@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
+const crypto = require("crypto");
 const { runChatTurn } = require("./lib/claude");
 const { getDashboardSummary, getProductsPage, getOrdersPage } = require("./lib/dashboard");
 
@@ -112,11 +113,16 @@ app.post("/api/chat", requireAuth, async (req, res) => {
   if (!req.session.chatHistory) req.session.chatHistory = [];
 
   try {
+    // A fresh id per HTTP request/turn. Tools use it to make sure a price-change
+    // proposal can only be confirmed by the user's NEXT message, never applied
+    // within the same turn it was proposed in (see lib/tools.js apply_price_change).
+    const turnId = crypto.randomUUID();
     const { text, history } = await runChatTurn({
       apiKey: process.env.ANTHROPIC_API_KEY,
       history: req.session.chatHistory,
       userMessage: message,
       session: req.session,
+      turnId,
     });
     // Cap stored history so the session object / token usage doesn't grow unbounded.
     req.session.chatHistory = history.slice(-40);
