@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BWL Store Auto</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #FAFAF9; color: #18181B; }
+  #app { display: flex; height: 100vh; }
+  .sidebar { width: 260px; flex-shrink: 0; background: #FFFFFF; border-right: 1px solid #E4E4E7; padding: 20px 18px; display: flex; flex-direction: column; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+  .brand .logo { width: 28px; height: 28px; border-radius: 8px; background: #3730A3; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .brand .name { font-size: 14px; font-weight: 700; }
+  .brand .sub { font-size: 11px; color: #71717A; }
+  .section-label { font-size: 11px; font-weight: 700; color: #A1A1AA; letter-spacing: 0.04em; text-transform: uppercase; margin: 14px 0 8px 0; }
+  .quick { font-size: 12.5px; padding: 9px 11px; background: #F4F4F5; border-radius: 8px; color: #3F3F46; margin-bottom: 7px; cursor: pointer; border: none; text-align: left; width: 100%; font-family: inherit; }
+  .quick:hover { background: #E4E4E7; }
+  .spacer { flex: 1; }
+  .logout { font-size: 12px; color: #A1A1AA; background: none; border: none; cursor: pointer; text-align: left; padding: 6px 0; font-family: inherit; }
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .chatheader { padding: 16px 28px; border-bottom: 1px solid #E4E4E7; background: #FFFFFF; }
+  .chatheader .t { font-size: 14.5px; font-weight: 700; }
+  .chatheader .s { font-size: 12px; color: #71717A; margin-top: 2px; }
+  #messages { flex: 1; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; }
+  .bubble { max-width: 70%; padding: 11px 15px; border-radius: 14px; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; }
+  .bubble.user { align-self: flex-end; background: #3730A3; color: #fff; border-radius: 14px 14px 2px 14px; }
+  .bubble.assistant { align-self: flex-start; background: #fff; border: 1px solid #E4E4E7; border-radius: 14px 14px 14px 2px; }
+  .bubble.error { align-self: flex-start; background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; border-radius: 14px 14px 14px 2px; }
+  .bubble.pending { align-self: flex-start; color: #A1A1AA; font-style: italic; }
+  .inputbar { padding: 16px 28px 24px 28px; background: #FFFFFF; border-top: 1px solid #E4E4E7; }
+  .inputrow { display: flex; gap: 10px; background: #F4F4F5; border-radius: 12px; padding: 6px 6px 6px 16px; align-items: center; }
+  .inputrow input { flex: 1; border: none; background: transparent; font-size: 13.5px; outline: none; font-family: inherit; }
+  .sendbtn { width: 34px; height: 34px; border-radius: 9px; background: #3730A3; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .sendbtn:disabled { opacity: 0.5; cursor: default; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+      <div>
+        <div class="name">BWL Store Auto</div>
+        <div class="sub">Black White Lifestyle</div>
+      </div>
+    </div>
+
+    <div class="section-label">สั่งงานด่วน</div>
+    <button class="quick" data-msg="เช็คออเดอร์ล่าสุด 10 รายการ">เช็คออเดอร์ล่าสุด</button>
+    <button class="quick" data-msg="สินค้าตัวไหนใกล้หมดสต็อกบ้าง">สินค้าใกล้หมดสต็อก</button>
+    <button class="quick" data-msg="ช่วยหาสินค้าทั้งหมดในร้านให้หน่อย">ดูสินค้าทั้งหมด</button>
+
+    <div class="spacer"></div>
+    <button class="logout" id="logoutBtn">ออกจากระบบ</button>
+  </div>
+
+  <div class="main">
+    <div class="chatheader">
+      <div class="t">พิมพ์สั่งงานร้านของคุณ</div>
+      <div class="s">เช็คสต็อก เช็คออเดอร์ หรือขอปรับราคาสินค้าได้เลย ระบบจะถามยืนยันก่อนบันทึกทุกครั้ง</div>
+    </div>
+    <div id="messages"></div>
+    <div class="inputbar">
+      <div class="inputrow">
+        <input id="msgInput" type="text" placeholder='พิมพ์คำสั่ง เช่น "เช็คออเดอร์วันนี้"...' autofocus>
+        <button class="sendbtn" id="sendBtn" aria-label="ส่ง">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const messagesEl = document.getElementById('messages');
+  const input = document.getElementById('msgInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  function addBubble(role, text) {
+    const el = document.createElement('div');
+    el.className = 'bubble ' + role;
+    el.textContent = text;
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return el;
+  }
+
+  addBubble('assistant', 'สวัสดีครับ พิมพ์สั่งงานร้าน Black White Lifestyle ได้เลย เช่น "เช็คสต็อกที่ใกล้หมด" หรือ "ปรับราคาเสื้อ Oversize สีดำ ไซส์ L ลง 10%"');
+
+  let sending = false;
+
+  async function sendMessage(text) {
+    if (!text || sending) return;
+    sending = true;
+    sendBtn.disabled = true;
+    addBubble('user', text);
+    const pending = addBubble('pending', 'กำลังพิมพ์...');
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
+      const data = await res.json();
+      pending.remove();
+      if (res.ok) {
+        addBubble('assistant', data.reply);
+      } else if (res.status === 401) {
+        window.location.href = '/login';
+      } else {
+        addBubble('error', 'เกิดข้อผิดพลาด: ' + (data.error || 'ไม่ทราบสาเหตุ'));
+      }
+    } catch (err) {
+      pending.remove();
+      addBubble('error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง');
+    } finally {
+      sending = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', () => {
+    const text = input.value.trim();
+    input.value = '';
+    sendMessage(text);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const text = input.value.trim();
+      input.value = '';
+      sendMessage(text);
+    }
+  });
+  document.querySelectorAll('.quick').forEach((btn) => {
+    btn.addEventListener('click', () => sendMessage(btn.dataset.msg));
+  });
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/login';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เข้าสู่ระบบ — BWL Store Auto</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #FAFAF9; color: #18181B;
+  }
+  .card { width: 100%; max-width: 360px; background: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 16px; padding: 32px 28px; }
+  .logo { width: 40px; height: 40px; border-radius: 10px; background: #3730A3; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+  h1 { font-size: 18px; margin: 0 0 4px 0; }
+  p.sub { font-size: 13px; color: #71717A; margin: 0 0 22px 0; }
+  input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #E4E4E7; font-size: 14px; margin-bottom: 14px; }
+  input:focus { outline: 2px solid #3730A3; outline-offset: 1px; }
+  button { width: 100%; padding: 13px; border-radius: 10px; border: none; background: #3730A3; color: #fff; font-weight: 700; font-size: 14.5px; cursor: pointer; }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .err { color: #B91C1C; font-size: 13px; margin: -6px 0 14px 0; min-height: 16px; }
+</style>
+</head>
+<body>
+  <form class="card" id="loginForm">
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    </div>
+    <h1>BWL Store Auto</h1>
+    <p class="sub">เข้าสู่ระบบเพื่อสั่งงานร้านด้วยแชท</p>
+    <input type="password" id="password" placeholder="รหัสผ่าน" autofocus required>
+    <div class="err" id="err"></div>
+    <button type="submit" id="submitBtn">เข้าสู่ระบบ</button>
+  </form>
+  <script>
+    const form = document.getElementById('loginForm');
+    const errEl = document.getElementById('err');
+    const btn = document.getElementById('submitBtn');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'กำลังเข้าสู่ระบบ...';
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: document.getElementById('password').value }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          errEl.textContent = data.error || 'เข้าสู่ระบบไม่สำเร็จ';
+        }
+      } catch (err) {
+        errEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'เข้าสู่ระบบ';
+      }
+    });
+  </script>
+</body>
+</html>
