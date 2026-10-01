@@ -1,0 +1,19 @@
+{
+  "name": "bwl-store-auto",
+  "version": "1.0.0",
+  "description": "BWL Store Auto - chat-driven Shopee store assistant via Pancake POS + Claude API",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "dotenv": "^16.4.5"
+  }
+}
