@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — BWL Store Auto</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app-shell">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="pageheader">
+      <div class="t">Dashboard</div>
+      <div class="s">ภาพรวมร้าน Black White Lifestyle แบบเรียลไทม์ จากข้อมูลจริงใน Pancake POS</div>
+    </div>
+    <div class="pagebody" id="pageBody">
+      <div class="loading-state">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+</div>
+
+<script src="/nav.js"></script>
+<script>
+  renderSidebar('dashboard');
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function statusPill(status) {
+    return `<span class="pill">${esc(status || "-")}</span>`;
+  }
+
+  async function load() {
+    const body = document.getElementById('pageBody');
+    try {
+      const res = await fetch('/api/dashboard');
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'โหลดข้อมูลไม่สำเร็จ');
+
+      const lowStockRows = data.low_stock_items.length
+        ? data.low_stock_items.map((v) => `
+          <tr>
+            <td>${esc(v.name)}</td>
+            <td><span class="pill pill-low">${v.remain_quantity ?? '-'} ชิ้น</span></td>
+            <td>${esc(v.price_display)}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="3"><div class="empty-state">ไม่มีสินค้าใกล้หมดสต็อก 🎉</div></td></tr>`;
+
+      const ordersRows = data.recent_orders.length
+        ? data.recent_orders.map((o) => `
+          <tr>
+            <td>#${esc(o.order_id)}</td>
+            <td>${esc(o.customer_name || '-')}</td>
+            <td>${statusPill(o.status)}</td>
+            <td>${esc(o.cod_display)}</td>
+            <td>${esc(o.inserted_at || '-')}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="5"><div class="empty-state">ยังไม่มีออเดอร์</div></td></tr>`;
+
+      body.innerHTML = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="label">ร้านค้า</div>
+            <div class="value" style="font-size:18px">${esc(data.shop_name)}</div>
+            <div class="hint">เชื่อมต่อ Pancake POS แล้ว</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">สินค้าใกล้หมดสต็อก</div>
+            <div class="value">${data.low_stock_count}</div>
+            <div class="hint">เหลือ ≤ ${data.low_stock_threshold} ชิ้น</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">ออเดอร์วันนี้ (ประมาณ)</div>
+            <div class="value">${data.orders_today_count}</div>
+            <div class="hint">นับจากออเดอร์ล่าสุดที่ดึงมา</div>
+          </div>
+          <div class="kpi-card">
+            <div class="label">ยอดขายวันนี้ (ประมาณ)</div>
+            <div class="value" style="font-size:20px">${esc(data.revenue_today_display)}</div>
+            <div class="hint">รวมจาก COD ออเดอร์วันนี้</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr; gap:18px;">
+          <div class="card">
+            <div class="card-title">
+              <span>สินค้าใกล้หมดสต็อก</span>
+              <a class="btn" href="/overview">ดูสินค้าทั้งหมด</a>
+            </div>
+            <table class="datatable">
+              <thead><tr><th>สินค้า</th><th>คงเหลือ</th><th>ราคา</th></tr></thead>
+              <tbody>${lowStockRows}</tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>ออเดอร์ล่าสุด</span>
+              <a class="btn" href="/orders">ดูออเดอร์ทั้งหมด</a>
+            </div>
+            <table class="datatable">
+              <thead><tr><th>เลขที่</th><th>ลูกค้า</th><th>สถานะ</th><th>COD</th><th>วันที่</th></tr></thead>
+              <tbody>${ordersRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      body.innerHTML = `<div class="error-state">โหลดข้อมูลไม่สำเร็จ: ${esc(err.message)}</div>`;
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สินค้า & สต็อก — BWL Store Auto</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app-shell">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="pageheader">
+      <div class="t">สินค้า & สต็อก</div>
+      <div class="s">ค้นหาและดูสต็อก/ราคาสินค้าทั้งหมด ข้อมูลจริงจาก Pancake POS</div>
+    </div>
+    <div class="pagebody">
+      <div class="toolbar">
+        <input type="search" id="searchInput" placeholder="ค้นหาชื่อสินค้า สี ไซส์...">
+        <label style="font-size:12.5px; color:var(--text-dim); display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" id="lowStockOnly"> เฉพาะใกล้หมดสต็อก (≤5 ชิ้น)
+        </label>
+        <button class="btn btn-primary" id="searchBtn">ค้นหา</button>
+      </div>
+      <div class="card">
+        <div id="tableWrap"><div class="loading-state">กำลังโหลดข้อมูล...</div></div>
+        <div class="pagination" id="pagination" style="display:none;">
+          <button class="btn" id="prevBtn">ก่อนหน้า</button>
+          <span class="page-indicator" id="pageIndicator"></span>
+          <button class="btn" id="nextBtn">ถัดไป</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/nav.js"></script>
+<script>
+  renderSidebar('overview');
+
+  let page = 1;
+  const pageSize = 20;
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  async function load() {
+    const wrap = document.getElementById('tableWrap');
+    const pagination = document.getElementById('pagination');
+    wrap.innerHTML = '<div class="loading-state">กำลังโหลดข้อมูล...</div>';
+    pagination.style.display = 'none';
+
+    const search = document.getElementById('searchInput').value.trim();
+    const lowStockOnly = document.getElementById('lowStockOnly').checked;
+
+    const params = new URLSearchParams({ page, pageSize });
+    if (search) params.set('search', search);
+    if (lowStockOnly) params.set('lowStockMax', 5);
+
+    try {
+      const res = await fetch('/api/products?' + params.toString());
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'โหลดข้อมูลไม่สำเร็จ');
+
+      if (!data.items.length) {
+        wrap.innerHTML = '<div class="empty-state">ไม่พบสินค้าที่ตรงกับเงื่อนไข</div>';
+        return;
+      }
+
+      const rows = data.items.map((v) => `
+        <tr>
+          <td>${esc(v.name)}</td>
+          <td>${v.remain_quantity <= 5 ? `<span class="pill pill-low">${v.remain_quantity ?? '-'} ชิ้น</span>` : `<span class="pill">${v.remain_quantity ?? '-'} ชิ้น</span>`}</td>
+          <td>${esc(v.price_display)}</td>
+        </tr>`).join('');
+
+      wrap.innerHTML = `
+        <table class="datatable">
+          <thead><tr><th>สินค้า</th><th>คงเหลือ</th><th>ราคา</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+
+      pagination.style.display = 'flex';
+      document.getElementById('pageIndicator').textContent = `หน้า ${page}`;
+      document.getElementById('prevBtn').disabled = page <= 1;
+      document.getElementById('nextBtn').disabled = !data.has_more;
+    } catch (err) {
+      wrap.innerHTML = `<div class="error-state">โหลดข้อมูลไม่สำเร็จ: ${esc(err.message)}</div>`;
+    }
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', () => { page = 1; load(); });
+  document.getElementById('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { page = 1; load(); } });
+  document.getElementById('lowStockOnly').addEventListener('change', () => { page = 1; load(); });
+  document.getElementById('prevBtn').addEventListener('click', () => { if (page > 1) { page--; load(); } });
+  document.getElementById('nextBtn').addEventListener('click', () => { page++; load(); });
+
+  load();
+</script>
+</body>
+</html>

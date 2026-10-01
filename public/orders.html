@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ออเดอร์ — BWL Store Auto</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app-shell">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="pageheader">
+      <div class="t">ออเดอร์</div>
+      <div class="s">รายการออเดอร์ล่าสุด เรียงใหม่ไปเก่า ข้อมูลจริงจาก Pancake POS</div>
+    </div>
+    <div class="pagebody">
+      <div class="toolbar">
+        <input type="search" id="searchInput" placeholder="ค้นหาชื่อลูกค้า / เบอร์โทร...">
+        <button class="btn btn-primary" id="searchBtn">ค้นหา</button>
+      </div>
+      <div class="card">
+        <div id="tableWrap"><div class="loading-state">กำลังโหลดข้อมูล...</div></div>
+        <div class="pagination" id="pagination" style="display:none;">
+          <button class="btn" id="prevBtn">ก่อนหน้า</button>
+          <span class="page-indicator" id="pageIndicator"></span>
+          <button class="btn" id="nextBtn">ถัดไป</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/nav.js"></script>
+<script>
+  renderSidebar('orders');
+
+  let page = 1;
+  const pageSize = 20;
+
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  async function load() {
+    const wrap = document.getElementById('tableWrap');
+    const pagination = document.getElementById('pagination');
+    wrap.innerHTML = '<div class="loading-state">กำลังโหลดข้อมูล...</div>';
+    pagination.style.display = 'none';
+
+    const search = document.getElementById('searchInput').value.trim();
+    const params = new URLSearchParams({ page, pageSize });
+    if (search) params.set('search', search);
+
+    try {
+      const res = await fetch('/api/orders?' + params.toString());
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'โหลดข้อมูลไม่สำเร็จ');
+
+      if (!data.items.length) {
+        wrap.innerHTML = '<div class="empty-state">ไม่พบออเดอร์ที่ตรงกับเงื่อนไข</div>';
+        return;
+      }
+
+      const rows = data.items.map((o) => `
+        <tr>
+          <td>#${esc(o.order_id)}</td>
+          <td>${esc(o.customer_name || '-')}</td>
+          <td>${esc(o.phone || '-')}</td>
+          <td><span class="pill">${esc(o.status || '-')}</span></td>
+          <td>${o.items_count ?? '-'}</td>
+          <td>${esc(o.cod_display)}</td>
+          <td>${esc(o.shipping_partner || '-')}</td>
+          <td>${esc(o.inserted_at || '-')}</td>
+        </tr>`).join('');
+
+      wrap.innerHTML = `
+        <table class="datatable">
+          <thead><tr><th>เลขที่</th><th>ลูกค้า</th><th>เบอร์โทร</th><th>สถานะ</th><th>จำนวนชิ้น</th><th>COD</th><th>ขนส่ง</th><th>วันที่</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+
+      pagination.style.display = 'flex';
+      document.getElementById('pageIndicator').textContent = `หน้า ${page}`;
+      document.getElementById('prevBtn').disabled = page <= 1;
+      document.getElementById('nextBtn').disabled = !data.has_more;
+    } catch (err) {
+      wrap.innerHTML = `<div class="error-state">โหลดข้อมูลไม่สำเร็จ: ${esc(err.message)}</div>`;
+    }
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', () => { page = 1; load(); });
+  document.getElementById('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { page = 1; load(); } });
+  document.getElementById('prevBtn').addEventListener('click', () => { if (page > 1) { page--; load(); } });
+  document.getElementById('nextBtn').addEventListener('click', () => { page++; load(); });
+
+  load();
+</script>
+</body>
+</html>

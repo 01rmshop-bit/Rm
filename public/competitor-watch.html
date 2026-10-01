@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Competitor Watch — BWL Store Auto</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app-shell">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="pageheader">
+      <div class="t">Competitor Watch <span class="badge badge-demo">DEMO</span></div>
+      <div class="s">เปรียบเทียบราคา/โปรโมชันของแบรนด์คู่แข่งในหมวดสตรีทแวร์ — หน้านี้ยังไม่เชื่อมข้อมูลจริง</div>
+    </div>
+    <div class="pagebody">
+      <div class="demo-note">
+        ⚠️ หน้านี้เป็นตัวอย่าง (mockup) ข้อมูลร้านคู่แข่ง/ราคาเป็นข้อมูลสมมติ ยังไม่ได้ดึงจาก Shopee/TikTok Shop จริง —
+        การดึงราคาคู่แข่งแบบเรียลไทม์ต้องต่อเครื่องมือเพิ่มเติม แจ้งได้หากต้องการให้ต่อระบบจริง
+      </div>
+
+      <div class="card">
+        <div class="card-title">เปรียบเทียบสินค้าหมวดเดียวกัน</div>
+        <table class="datatable">
+          <thead><tr><th>สินค้า (ของเรา)</th><th>ราคาเรา</th><th>คู่แข่ง</th><th>ราคาคู่แข่ง</th><th>ส่วนต่าง</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>เสื้อ Oversize สีดำ ไซส์ L</td>
+              <td>฿590</td>
+              <td>Streetwear Co.</td>
+              <td>฿550</td>
+              <td><span class="pill pill-low">แพงกว่า ฿40</span></td>
+            </tr>
+            <tr>
+              <td>เสื้อ Oversize สีขาว ไซส์ M</td>
+              <td>฿590</td>
+              <td>Urban Thread TH</td>
+              <td>฿620</td>
+              <td><span class="pill" style="background:var(--good-bg);color:var(--good-text);border:1px solid var(--good-border)">ถูกกว่า ฿30</span></td>
+            </tr>
+            <tr>
+              <td>กางเกงวอร์มขาเดฟ</td>
+              <td>฿650</td>
+              <td>Streetwear Co.</td>
+              <td>฿690</td>
+              <td><span class="pill" style="background:var(--good-bg);color:var(--good-text);border:1px solid var(--good-border)">ถูกกว่า ฿40</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:18px;">
+        <div class="card-title">คู่แข่งที่ติดตาม</div>
+        <table class="datatable">
+          <thead><tr><th>ร้าน</th><th>แพลตฟอร์ม</th><th>ยอดขาย/เดือน (ประมาณ)</th><th>โปรโมชันล่าสุด</th></tr></thead>
+          <tbody>
+            <tr><td>Streetwear Co.</td><td><span class="pill">Shopee</span></td><td>~1,200 ชิ้น</td><td>ลด 15% ทั้งร้าน</td></tr>
+            <tr><td>Urban Thread TH</td><td><span class="pill">TikTok Shop</span></td><td>~800 ชิ้น</td><td>ซื้อ 2 ลด 10%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/nav.js"></script>
+<script>renderSidebar('competitor-watch');</script>
+</body>
+</html>

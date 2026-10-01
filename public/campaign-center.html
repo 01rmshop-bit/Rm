@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campaign Center — BWL Store Auto</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app-shell">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="pageheader">
+      <div class="t">Campaign Center <span class="badge badge-demo">DEMO</span></div>
+      <div class="s">วางแผนและติดตามแคมเปญการตลาด — หน้านี้ยังไม่เชื่อมข้อมูลโฆษณาจริง</div>
+    </div>
+    <div class="pagebody">
+      <div class="demo-note">
+        ⚠️ หน้านี้เป็นตัวอย่าง (mockup) ข้อมูลทั้งหมดเป็นข้อมูลสมมติเพื่อแสดงแนวคิด ยังไม่เชื่อมต่อกับ Facebook/TikTok Ads หรือระบบโฆษณาจริง —
+        หากต้องการใช้งานจริง แจ้งได้เลย ผมช่วยต่อ API ให้ได้
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="label">แคมเปญที่กำลังทำงาน</div><div class="value">3</div><div class="hint">ตัวอย่างข้อมูล</div></div>
+        <div class="kpi-card"><div class="label">งบรวมเดือนนี้</div><div class="value" style="font-size:20px">฿45,000</div><div class="hint">ตัวอย่างข้อมูล</div></div>
+        <div class="kpi-card"><div class="label">ROAS เฉลี่ย</div><div class="value">3.2x</div><div class="hint">ตัวอย่างข้อมูล</div></div>
+        <div class="kpi-card"><div class="label">ยอดขายจากแคมเปญ</div><div class="value" style="font-size:20px">฿144,000</div><div class="hint">ตัวอย่างข้อมูล</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>แคมเปญทั้งหมด</span><button class="btn btn-primary" disabled>+ สร้างแคมเปญใหม่</button></div>
+        <table class="datatable">
+          <thead><tr><th>แคมเปญ</th><th>แพลตฟอร์ม</th><th>สถานะ</th><th>งบ/วัน</th><th>ROAS</th><th>ช่วงเวลา</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>BWL Oversize Collection — Awareness</td>
+              <td><span class="pill">Facebook Ads</span></td>
+              <td><span class="pill" style="background:var(--good-bg);color:var(--good-text);border:1px solid var(--good-border)">กำลังทำงาน</span></td>
+              <td>฿800</td><td>3.4x</td><td>1 ต.ค. – 15 ต.ค.</td>
+            </tr>
+            <tr>
+              <td>Retarget ตะกร้าสินค้า</td>
+              <td><span class="pill">TikTok Ads</span></td>
+              <td><span class="pill" style="background:var(--good-bg);color:var(--good-text);border:1px solid var(--good-border)">กำลังทำงาน</span></td>
+              <td>฿500</td><td>4.1x</td><td>20 ก.ย. – ต่อเนื่อง</td>
+            </tr>
+            <tr>
+              <td>เปิดตัวลายเสื้อใหม่ Q4</td>
+              <td><span class="pill">Facebook Ads</span></td>
+              <td><span class="pill">หยุดชั่วคราว</span></td>
+              <td>฿1,200</td><td>2.1x</td><td>5 ก.ย. – 19 ก.ย.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/nav.js"></script>
+<script>renderSidebar('campaign-center');</script>
+</body>
+</html>
